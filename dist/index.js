@@ -24,5 +24,5 @@ app.get("/", (req, res) => {
     res.send("Hello Expressjs with typescript!!");
 });
 app.listen(PORT, () => {
-    console.log(`🚀 App listening to port ${PORT}`);
+    console.log(`🚀App listening to port➡️  ${PORT}`);
 });
