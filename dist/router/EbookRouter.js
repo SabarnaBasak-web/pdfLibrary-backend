@@ -16,6 +16,9 @@ exports.router = void 0;
 const express_1 = __importDefault(require("express"));
 exports.router = express_1.default.Router();
 const Ebook_1 = require("../models/Ebook");
+const Author_1 = require("../models/Author");
+const Category_1 = require("../models/Category");
+const User_model_1 = require("../models/User.model");
 exports.router.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const allBooks = yield Ebook_1.Ebook.findAll();
@@ -29,13 +32,35 @@ exports.router.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function
     }
 }));
 exports.router.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { name, description } = req.body;
-    const result = yield Ebook_1.Ebook.create({
-        name: name,
-        description: description,
+    const { name, description, authorName, categoryName, username } = req.body;
+    const authorDetails = yield Author_1.Author.findOne({ where: { name: authorName } });
+    const userDetails = yield User_model_1.User.findOne({
+        where: {
+            username: username,
+        },
     });
-    if (result) {
-        console.log("New Entry added");
-        res.json("New Entry added");
+    const allCategories = yield Category_1.Category.findAll({
+        where: {
+            name: categoryName.split(","),
+        },
+    });
+    let newAuthor = null;
+    if (!authorDetails) {
+        newAuthor = yield Author_1.Author.create({ name: authorName });
+    }
+    if (allCategories.length) {
+        const EbookEntries = allCategories.map((category) => {
+            return {
+                name: name,
+                description: description,
+                AuthorId: (newAuthor === null || newAuthor === void 0 ? void 0 : newAuthor.id) || (authorDetails === null || authorDetails === void 0 ? void 0 : authorDetails.id),
+                CategoryId: category.id,
+                UserId: userDetails === null || userDetails === void 0 ? void 0 : userDetails.id,
+            };
+        });
+        const result = yield Ebook_1.Ebook.bulkCreate(EbookEntries);
+        if (result) {
+            res.json("New Entries added");
+        }
     }
 }));
