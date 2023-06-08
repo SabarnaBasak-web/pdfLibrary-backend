@@ -15,13 +15,25 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.router = void 0;
 const express_1 = __importDefault(require("express"));
 exports.router = express_1.default.Router();
-const Ebook_1 = __importDefault(require("../models/Ebook"));
-exports.router.get("/", (req, res) => {
-    res.send("Ebook router");
-});
+const Ebook_1 = require("../models/Ebook");
+exports.router.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const allBooks = yield Ebook_1.Ebook.findAll();
+        console.log("all books", allBooks);
+        if (allBooks) {
+            res.json(allBooks);
+        }
+    }
+    catch (err) {
+        console.log("Error", err);
+    }
+}));
 exports.router.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { name, description } = req.body;
-    const result = yield Ebook_1.default.create({ name: name, description: description });
+    const result = yield Ebook_1.Ebook.create({
+        name: name,
+        description: description,
+    });
     if (result) {
         console.log("New Entry added");
         res.json("New Entry added");
