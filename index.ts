@@ -1,31 +1,25 @@
 import express, { Request, Response } from "express";
 import dotEnv from "dotenv";
 import path from "path";
-import { Sequelize } from "sequelize";
-import { dbConfigDetails } from "./DbConfig/DbConfig";
+import { sequelize } from "./DbConfig";
+import Ebook from "./models/Ebook";
+import { router as EbookRouter } from "./router/EbookRouter";
 dotEnv.config({ path: path.resolve(__dirname, "../.env") });
 const app = express();
 
+app.use(express.json());
 const PORT = process.env.PORT;
 
-const sequelise = new Sequelize(
-  dbConfigDetails.database,
-  dbConfigDetails.username,
-  dbConfigDetails.password,
-  {
-    host: dbConfigDetails.host,
-    port: dbConfigDetails.port,
-    dialect: "postgres",
-  }
-);
-
-sequelise
+sequelize
   .authenticate()
-  .then((res) => console.log("Connection successfull ✔️"))
-  .catch((error) => console.warn("An error occured ", error, "🔻"));
-app.get("/", (req: Request, res: Response) => {
-  res.send("Hello Expressjs with typescript!!");
-});
+  .then(() => console.log("Authenticated ✅"))
+  .catch((err) => console.log(err));
+
+sequelize
+  .sync({ alter: true })
+  .then(() => console.log("Synced ✔️"))
+  .catch((err) => console.log(err));
+app.use("/ebook", EbookRouter);
 app.listen(PORT, () => {
   console.log(`🚀App listening to port➡️  ${PORT}`);
 });

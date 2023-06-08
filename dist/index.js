@@ -6,23 +6,21 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const path_1 = __importDefault(require("path"));
-const sequelize_1 = require("sequelize");
-const DbConfig_1 = require("./DbConfig/DbConfig");
+const DbConfig_1 = require("./DbConfig");
+const EbookRouter_1 = require("./router/EbookRouter");
 dotenv_1.default.config({ path: path_1.default.resolve(__dirname, "../.env") });
 const app = (0, express_1.default)();
+app.use(express_1.default.json());
 const PORT = process.env.PORT;
-const sequelise = new sequelize_1.Sequelize(DbConfig_1.dbConfigDetails.database, DbConfig_1.dbConfigDetails.username, DbConfig_1.dbConfigDetails.password, {
-    host: DbConfig_1.dbConfigDetails.host,
-    port: DbConfig_1.dbConfigDetails.port,
-    dialect: "postgres",
-});
-sequelise
+DbConfig_1.sequelize
     .authenticate()
-    .then((res) => console.log("Connection successfull ✔️"))
-    .catch((error) => console.warn("An error occured ", error, "🔻"));
-app.get("/", (req, res) => {
-    res.send("Hello Expressjs with typescript!!");
-});
+    .then(() => console.log("Authenticated ✅"))
+    .catch((err) => console.log(err));
+DbConfig_1.sequelize
+    .sync({ alter: true })
+    .then(() => console.log("Synced ✔️"))
+    .catch((err) => console.log(err));
+app.use("/ebook", EbookRouter_1.router);
 app.listen(PORT, () => {
     console.log(`🚀App listening to port➡️  ${PORT}`);
 });
