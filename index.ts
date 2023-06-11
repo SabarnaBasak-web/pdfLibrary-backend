@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express from "express";
 import dotEnv from "dotenv";
 import path from "path";
 import { sequelize } from "./DbConfig";
@@ -9,16 +9,30 @@ import { Category } from "./models/Category";
 import { router as CategoryRouter } from "./router/CategoryRouter";
 import { User as UserModel } from "./models/User.model";
 import { router as UserRouter } from "./router/UserRouter";
-
+import bodyParser from "body-parser";
+import cors from "cors";
 dotEnv.config({ path: path.resolve(__dirname, "../.env") });
 const app = express();
-
+const PORT = process.env.PORT;
 Author.hasOne(Ebook);
 Category.hasMany(Ebook);
 UserModel.hasOne(Ebook);
 
+var whitelist = ["http://127.0.0.1:5173"];
+var corsOptions = {
+  origin: function (origin: any, callback: any) {
+    console.log("origin", origin);
+    if (whitelist.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+};
+
 app.use(express.json());
-const PORT = process.env.PORT;
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cors());
 
 sequelize
   .authenticate()
